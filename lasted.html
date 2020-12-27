@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+
+<div class="container">
+
+
+
+
+<div class="module module-home-video">
+    <span class="module-strip">Latest Product Video</span>
+    <div id="demo" data_highest_second="0" data-width="0" data-real-index="33" data-dur="88"></div>
+</div>
+
+<script>
+
+</script>
+
+
+  <div class="progress" style="width:100%;">
+    <div id="bar_value" class="progress-bar" style="width:0%"></div>
+  </div>
+ </div> 
+<p id="thetimer"></p>
+
+
+<script>
+const myvideo = document.getElementById("demo");
+const myvideo_text = document.getElementById("thetimer");
+const bar = document.getElementById("bar_value");
+
+//getCurrentTime
+var myVar, xvar;
+
+let ob = {
+ // we have to make ajax call to data base to get real index
+ index : Number(myvideo.getAttribute('data-real-index')),
+ real_index: undefined,
+ paused_in: undefined,
+ paused_second: undefined,
+ duration: myvideo.getAttribute('data-dur'),
+ myFunction : () => {
+    /* this is the king script line to mange if user paused */
+    if (player.getCurrentTime() < ob.paused_second ) {
+    ob.index = ob.index;    
+    } else {
+    ob.index += 1;
+    }
+
+    console.log(ob.index);
+    console.log(ob.duration)
+    myvideo_text.textContent = ob.index - 1;
+    let precent = Math.round(ob.index / ob.duration * 100);
+    
+    if (precent >= 100) {
+    bar.style.width = 100 + "%";
+    bar.textContent = 100 + "%";
+    } else {
+    bar.style.width = precent + "%";
+    bar.textContent = precent + "%";    
+    }
+    xvar = setTimeout(ob.myFunction, 1000);
+    
+ },
+ playfun : (myVar)=> {
+ myVar = setTimeout(ob.myFunction, 1000);
+ },
+ stopfun : (myVar)=> {
+
+ ob.paused_in = ob.index;
+ ob.paused_second = player.getCurrentTime();
+ ob.real_index = Math.round(ob.paused_second - .5);
+ console.log('real index is: ' + ob.real_index);
+ myvideo.setAttribute('data-real-index', ob.real_index);
+ myvideo.setAttribute('data_highest_second', ob.paused_second);
+ myvideo.setAttribute('data-width', bar.style.width);
+  
+ console.log('User Paused the video in: ' + ob.paused_in);
+ console.log('video second in: ' + ob.paused_second);
+ clearTimeout(myVar); 
+ ob.stopfun1(xvar);
+ // ajax call to db can be done here to store data
+ },
+ stopfun1 : (xvar)=> {
+ // ajax call to db can be done here
+ clearTimeout(xvar);
+ myvideo.setAttribute('data-real-index', ob.real_index);
+ myvideo.setAttribute('data_highest_second', ob.paused_second);
+ myvideo.setAttribute('data-width', bar.style.width);
+ }
+}
+
+
+//myvideo.currentTime = ob.index - .5;
+
+
+//myvideo.addEventListener("ended", ob.stopfun);
+
+    var player, playing = false;
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('demo', {
+            height: '360',
+            width: '640',
+            videoId: 'ksdi3axILoI',
+            playerVars: {'start': Math.round(myvideo.getAttribute('data-real-index') - .5)},
+            events: {
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerStateChange(event) {
+
+      if (event.data == YT.PlayerState.PLAYING) {
+         //alert('video started');
+         // when video is playing run my awesome fun
+         ob.playfun();
+      
+         playing = true;
+        }
+
+      else if(event.data == YT.PlayerState.PAUSED){
+            //alert('video paused');
+            // when video is paused run my awesome pause fun
+             
+         ob.stopfun();
+            playing = false;
+       } else if(event.data == YT.PlayerState.ENDED){
+            // when video is ended run my awesome pause fun
+            // and it will call my end fun
+            ob.stopfun();
+            playing = false;
+
+       }
+}
+</script>
+</body>
+</html>
