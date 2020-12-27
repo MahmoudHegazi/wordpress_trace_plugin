@@ -21,4 +21,7 @@ function onYouTubeIframeAPIReady() {
     })
    
   ``` 
-    
+  
+  # What is do:
+  
+  use Youtube API to trace the video time with dynamic values from database to trace students progress in class room, accurate 100%
